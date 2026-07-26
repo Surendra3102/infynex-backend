@@ -124,17 +124,17 @@ from .models import User
 
 token_generator = PasswordResetTokenGenerator()
 
-
 from django.conf import settings
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
-from django.core.mail import send_mail
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
-from rest_framework import status
-from rest_framework.response import Response
-from rest_framework.views import APIView
 
-import socket
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+
+import sib_api_v3_sdk
+from sib_api_v3_sdk.rest import ApiException
 
 from .models import User
 from .serializers import ForgotPasswordSerializer
@@ -162,50 +162,36 @@ class ForgotPasswordAPIView(APIView):
             return Response(
                 {
                     "success": True,
-                    "message": "If the email exists, a password reset link has been sent.",
+                    "message": "If the email exists, a password reset link has been sent."
                 },
-                status=status.HTTP_200_OK,
+                status=status.HTTP_200_OK
             )
 
         uid = urlsafe_base64_encode(force_bytes(user.pk))
         token = token_generator.make_token(user)
 
-        print("User PK:", user.pk)
-        print("UID:", uid)
-        print("Token:", token)
-
         reset_link = f"{settings.FRONTEND_URL}/reset-password/{uid}/{token}"
 
-        # ================= DEBUG =================
+        configuration = sib_api_v3_sdk.Configuration()
+        configuration.api_key["api-key"] = settings.BREVO_API_KEY
 
-        print("=" * 60)
-        print("EMAIL_HOST:", settings.EMAIL_HOST)
-        print("EMAIL_PORT:", settings.EMAIL_PORT)
-        print("EMAIL_HOST_USER:", settings.EMAIL_HOST_USER)
-        print("DEFAULT_FROM_EMAIL:", settings.DEFAULT_FROM_EMAIL)
-        print("FRONTEND_URL:", settings.FRONTEND_URL)
-        print("RESET LINK:", reset_link)
-        print("=" * 60)
+        api_instance = sib_api_v3_sdk.TransactionalEmailsApi(
+            sib_api_v3_sdk.ApiClient(configuration)
+        )
 
-        try:
-            print("Testing SMTP connection...")
-
-            sock = socket.create_connection(
-                (settings.EMAIL_HOST, settings.EMAIL_PORT),
-                timeout=10,
-            )
-
-            print("✅ SMTP connection successful")
-            sock.close()
-
-        except Exception as e:
-            print("❌ SMTP connection failed:", repr(e))
-
-        # ================= END DEBUG =================
-
-        send_mail(
+        email_data = sib_api_v3_sdk.SendSmtpEmail(
+            sender={
+                "name": "Infynex HR Portal",
+                "email": settings.DEFAULT_FROM_EMAIL,
+            },
+            to=[
+                {
+                    "email": user.email,
+                    "name": name,
+                }
+            ],
             subject="Reset Your Password",
-            message=f"""
+            text_content=f"""
 Hello {name},
 
 We received a request to reset your password.
@@ -218,11 +204,24 @@ If you did not request this, you can safely ignore this email.
 
 Thanks,
 Infynex HR Portal
-""",
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[user.email],
-            fail_silently=False,
+"""
         )
+
+        try:
+            response = api_instance.send_transac_email(email_data)
+            print("Brevo Response:", response)
+
+        except ApiException as e:
+            print("Brevo Error:", e)
+
+            return Response(
+                {
+                    "success": False,
+                    "message": "Unable to send reset email.",
+                    "error": str(e),
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
         return Response(
             {
@@ -230,8 +229,7 @@ Infynex HR Portal
                 "message": "Password reset link sent successfully.",
             },
             status=status.HTTP_200_OK,
-        )
-         
+        )         
 from django.utils.http import urlsafe_base64_decode
 from django.utils.encoding import force_str
 
