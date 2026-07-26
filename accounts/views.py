@@ -169,7 +169,8 @@ class ForgotPasswordAPIView(APIView):
 
         uid = urlsafe_base64_encode(force_bytes(user.pk))
         token = token_generator.make_token(user)
-
+        print(uid)
+        print(token)
         reset_link = f"{settings.FRONTEND_URL}/reset-password/{uid}/{token}"
 
         configuration = sib_api_v3_sdk.Configuration()
