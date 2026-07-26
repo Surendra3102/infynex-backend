@@ -145,7 +145,7 @@ CORS_ALLOWED_ORIGINS = [
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
-    "https://web-production-500ef.up.railway.app"
+    "https://infynexitsolutions-frontend.onrender.com",
 ]
 CORS_ALLOW_CREDENTIALS = True
 
@@ -170,7 +170,7 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = config("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD")
 
-DEFAULT_FROM_EMAIL = "surendrabsvm005@gmail.com"
+DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL")
 
 COMPANY_EMAIL = "surendrabsvm005@gmail.com"
 
