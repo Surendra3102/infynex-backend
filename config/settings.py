@@ -139,6 +139,7 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://localhost:3000",
+    "https://infynexitsolutions-frontend.onrender.com",
     
 ]
 CSRF_TRUSTED_ORIGINS = [
