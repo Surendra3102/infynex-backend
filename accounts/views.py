@@ -124,6 +124,24 @@ from .models import User
 
 token_generator = PasswordResetTokenGenerator()
 
+
+from django.conf import settings
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from django.core.mail import send_mail
+from django.utils.encoding import force_bytes
+from django.utils.http import urlsafe_base64_encode
+from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+import socket
+
+from .models import User
+from .serializers import ForgotPasswordSerializer
+
+token_generator = PasswordResetTokenGenerator()
+
+
 class ForgotPasswordAPIView(APIView):
 
     def post(self, request):
@@ -135,28 +153,55 @@ class ForgotPasswordAPIView(APIView):
         try:
             user = User.objects.get(email=email)
 
-            # Display name based on account type
             if user.role == "candidate":
                 name = user.full_name
             else:
                 name = user.hr_name
 
         except User.DoesNotExist:
-            # Don't reveal whether the email exists
             return Response(
                 {
                     "success": True,
-                    "message": "If the email exists, a password reset link has been sent."
+                    "message": "If the email exists, a password reset link has been sent.",
                 },
-                status=status.HTTP_200_OK
+                status=status.HTTP_200_OK,
             )
-            
+
         uid = urlsafe_base64_encode(force_bytes(user.pk))
         token = token_generator.make_token(user)
+
         print("User PK:", user.pk)
         print("UID:", uid)
         print("Token:", token)
+
         reset_link = f"{settings.FRONTEND_URL}/reset-password/{uid}/{token}"
+
+        # ================= DEBUG =================
+
+        print("=" * 60)
+        print("EMAIL_HOST:", settings.EMAIL_HOST)
+        print("EMAIL_PORT:", settings.EMAIL_PORT)
+        print("EMAIL_HOST_USER:", settings.EMAIL_HOST_USER)
+        print("DEFAULT_FROM_EMAIL:", settings.DEFAULT_FROM_EMAIL)
+        print("FRONTEND_URL:", settings.FRONTEND_URL)
+        print("RESET LINK:", reset_link)
+        print("=" * 60)
+
+        try:
+            print("Testing SMTP connection...")
+
+            sock = socket.create_connection(
+                (settings.EMAIL_HOST, settings.EMAIL_PORT),
+                timeout=10,
+            )
+
+            print("✅ SMTP connection successful")
+            sock.close()
+
+        except Exception as e:
+            print("❌ SMTP connection failed:", repr(e))
+
+        # ================= END DEBUG =================
 
         send_mail(
             subject="Reset Your Password",
@@ -182,11 +227,10 @@ Infynex HR Portal
         return Response(
             {
                 "success": True,
-                "message": "Password reset link sent successfully."
+                "message": "Password reset link sent successfully.",
             },
             status=status.HTTP_200_OK,
         )
-        
          
 from django.utils.http import urlsafe_base64_decode
 from django.utils.encoding import force_str

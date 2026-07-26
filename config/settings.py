@@ -164,7 +164,7 @@ from decouple import config
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 
 EMAIL_HOST = "smtp-relay.brevo.com"
-EMAIL_PORT = 2525        # Changed from 587
+EMAIL_PORT = 587        # Changed from 587
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
 EMAIL_TIMEOUT = 20
