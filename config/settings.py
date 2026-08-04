@@ -45,8 +45,6 @@ INSTALLED_APPS = [
     'rest_framework',
     "rest_framework_simplejwt",
     'corsheaders',
-    
-    'accounts',
     'contact',
 ]
 
@@ -156,7 +154,7 @@ CORS_ALLOW_HEADERS = [
 
 
 
-AUTH_USER_MODEL = "accounts.User"
+
 
 from decouple import config
 
