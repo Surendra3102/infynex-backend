@@ -29,7 +29,7 @@ DEBUG = config("DEBUG", default=False, cast=bool)
 ALLOWED_HOSTS = [
     "127.0.0.1",
     "localhost",
-    '.up.railway.app'
+    '.onrender.com'
 ]
 
 
@@ -85,13 +85,9 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': config("DB_NAME"),
-        'USER':config("DB_USER"),
-        "PASSWORD":config("DB_PASSWORD"),
-        "HOST":config("DB_HOST"),
-        "PORT":config("DB_PORT")
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
     }
 }
 
