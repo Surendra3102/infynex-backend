@@ -29,7 +29,8 @@ DEBUG = config("DEBUG", default=False, cast=bool)
 ALLOWED_HOSTS = [
     "127.0.0.1",
     "localhost",
-    '.onrender.com'
+    '.onrender.com',
+    "api.infynexit.com"
 ]
 
 
@@ -134,12 +135,16 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://localhost:3000",
     "https://infynex-it-solutions-frontend-zeta.vercel.app",
+    "https://infynexit.com",
+    "https://www.infynexit.com"
     
 ]
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
     "https://infynex-it-solutions-frontend-zeta.vercel.app",
+    "https://infynexit.com",
+    "https://www.infynexit.com"
 ]
 CORS_ALLOW_CREDENTIALS = True
 
